@@ -8,7 +8,7 @@ Data is in long comma seperated text files, place it into lists sorted by catego
 Initially this will assume the 6 tray, 1 temperature, 9 peltier sensor arrangement but as I assume this is not always constant generalizing may be important.
 
 ### 2) Restrict data to interesting range
-We only care about peaks that happen below -10
+We only care about peaks that happen below -10, but above -36
 
 Resistance readings in files can be converted to temperature using a formula
 > Temp = -0.007742(resistance) + 106.5
@@ -26,4 +26,4 @@ Approximate area under peak by calculating local trend, no longer treating as ne
 
 Rough riemann sum like calculation of area using a sum of differences in peak points from trend.
 
-Print information 
+Print information
