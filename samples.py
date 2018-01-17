@@ -1,13 +1,17 @@
 from constants import *
+import numpy as np
 
 class importData:
 
     sensors = []
+    totalTrays = None
+    sensorsPerTray = None
 
-    def __init__(self, fileName, numberOfTrays):
+    def __init__(self, fileName, numberOfTrays, numberOfSensorsPerTray):
+        self.totalTrays = numberOfTrays
+        self.sensorsPerTray = numberOfSensorsPerTray
         newLines = [line.rstrip('\n') for line in open(fileName)]
         sampleNumber = 0
-        sensorType = TEMPERATURE #The data is stored such that the first 'numberOfTrays' values contain temperature data
 
         ListOfLists = []
         for line in newLines:
@@ -20,10 +24,23 @@ class importData:
                 tempList.append(float(line.pop(0)))
                 channel = line.pop(0)
             channel = int(float(channel))
-            if (sampleNumber >= numberOfTrays): #This ensures the first 'numberOfTrays' sensors are recorded as temp
-                sensorType = PELTIER
+
+            #The following assumes the first few trays will be a temperature sensor each from a different tray
+            #It then assigns the remaining sensors tray numbers in ascending order starting at 0
+            #The use of sensorsPerTray-1 is because this number includes one temperature sensor that should already be accounted for
+
+            #Ideally this will leave the sensors with labels in the following order assuming 6 trays of 10 sensors
+            # 012345000000000111111111222222222333333333444444444555555555
+
+            if (sampleNumber >= self.totalTrays):
+                trayNumber = int((sampleNumber - self.totalTrays)/(self.sensorsPerTray - 1))
+                self.sensors.append(sensor(channel, trayNumber, PELTIER, tempList))
+            else:
+                self.sensors.append(sensor(channel,sampleNumber, TEMPERATURE, tempList))
+
             sampleNumber = sampleNumber + 1
-            self.sensors.append(sensor(channel,sensorType,tempList))
+
+            #My list does not fail the while loop's test when it's empty...
             if not line:
                 break
 
@@ -31,7 +48,17 @@ class importData:
         for device in self.sensors:
             if device.type == TEMPERATURE:
                 for index, resistance in enumerate(device.samples):
+
+                    #This formula was provided by BrockU and assumes a linear relationship between sensor reading and temperature
                     device.samples[index] = (-0.007742 * resistance + 106.5)
+
+    def samplesInTray(self,number):
+        justOneTray = []
+        for device in self.sensors:
+            if device.trayNumber == number:
+                justOneTray.append(device)
+        return justOneTray
+
 
 
 
@@ -51,18 +78,42 @@ class sensor:
         return "#" + str(self.id) + "-" + str(self.samples)
 
 class trayOfSensors:
-    temperatureSensor = None
-    otherSensorsInTray = []
+
+    # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2631518/ is how I hope to find spikes
+
+    trayID = None
+    tempReadings = []
+    voltReadings = []
+
+    def __init__(self, sensors):
 
 
 
 
 
 
-data = importData('test.txt',6)
+    #This will use temperature data and cut off values that aren't interesting.
+    #This is a computationally expensive way to do this but I'm too lazy to
+    def deleteDataBelow(self,temperature):
+
+
+
+    #def deleteDataAbove(self,temperature):
+
+
+
+
+
+
+
+
+data = importData('test.txt',6,10)
 print(data.sensors)
 data.ConvertTemperatures()
 print(data.sensors)
+
+justTestingOneTray = trayOfSensors(data.samplesInTray(2))
+
 
 
 
