@@ -3,12 +3,9 @@ import numpy as np
 
 class importData:
 
-    sensors = []
-    totalTrays = None
-    sensorsPerTray = None
-
     def __init__(self, fileName, numberOfTrays, numberOfSensorsPerTray):
         self.totalTrays = numberOfTrays
+        self.sensors = []
         self.sensorsPerTray = numberOfSensorsPerTray
         newLines = [line.rstrip('\n') for line in open(fileName)]
         sampleNumber = 0
@@ -63,10 +60,6 @@ class importData:
 
 
 class sensor:
-    id = None
-    trayNumber = None
-    type = UNKNOWN_UNINITIALIZED
-    samples = []
 
     def __init__(self, idNumber,trayNo,typeOfSensor,values):
         self.id = idNumber
@@ -86,15 +79,18 @@ class trayOfSensors:
     voltReadings = []
 
     def __init__(self, sensors):
-
-
+        self.tempReadings = list(sensors[0].samples)
+        for sens in sensors[1:]:
+            self.voltReadings.append(list(sens.samples))
+        qrno = np.array(self.voltReadings)
+        print(qrno.shape)
 
 
 
 
     #This will use temperature data and cut off values that aren't interesting.
     #This is a computationally expensive way to do this but I'm too lazy to
-    def deleteDataBelow(self,temperature):
+    #def deleteDataBelow(self,temperature):
 
 
 
