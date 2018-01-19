@@ -74,31 +74,29 @@ class trayOfSensors:
 
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2631518/ is how I hope to find spikes
 
-    trayID = None
-    tempReadings = []
-    voltReadings = []
 
     def __init__(self, sensors):
+        self.trayID = sensors[0].id
+        self.tempReadings = []
+        self.voltReadings = []
         self.tempReadings = list(sensors[0].samples)
         for sens in sensors[1:]:
             self.voltReadings.append(list(sens.samples))
-        qrno = np.array(self.voltReadings)
-        print(qrno.shape)
 
 
-
-
-    #This will use temperature data and cut off values that aren't interesting.
-    #This is a computationally expensive way to do this but I'm too lazy to
-    #def deleteDataBelow(self,temperature):
-
-
-
-    #def deleteDataAbove(self,temperature):
-
-
-
-
+    #This deletes all temperatures above a max, or all temperatures below a min
+    def maxMinTemperature(self,temperatureCutoff, trueForMax):
+        volts = np.array(self.voltReadings)
+        temps = np.array(self.tempReadings)
+        print(volts.shape)
+        print(volts)
+        print(temps)
+        for i in reversed(range(len(temps))): #By going backwards indicies that are removed don't matter any more
+            if (trueForMax and temps[i] > temperatureCutoff or (not trueForMax) and temps[i] < temperatureCutoff):
+                volts = np.delete(volts,i,1)
+                temps = np.delete(temps,i)
+        self.voltReadings = volts.tolist()
+        self.tempReadings = temps.tolist()
 
 
 
@@ -109,6 +107,9 @@ data.ConvertTemperatures()
 print(data.sensors)
 
 justTestingOneTray = trayOfSensors(data.samplesInTray(2))
+justTestingOneTray.maxMinTemperature(3.785,False)
+
+
 
 
 
